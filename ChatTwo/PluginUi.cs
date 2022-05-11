@@ -15,6 +15,7 @@ internal sealed class PluginUi : IDisposable {
     internal string Salt { get; }
 
     internal ImFontPtr? RegularFont { get; private set; }
+    internal ImFontPtr? DefaultFont { get; private set; }
     internal ImFontPtr? ItalicFont { get; private set; }
     internal Vector4 DefaultText { get; private set; }
 
@@ -32,6 +33,7 @@ internal sealed class PluginUi : IDisposable {
     private List<IUiComponent> Components { get; }
     private ImFontConfigPtr _fontCfg;
     private ImFontConfigPtr _fontCfgMerge;
+    private ImFontConfigPtr _defaultFontCf;
     private (GCHandle, int, float) _regularFont;
     private (GCHandle, int, float) _italicFont;
     private (GCHandle, int, float) _jpFont;
@@ -110,7 +112,7 @@ internal sealed class PluginUi : IDisposable {
 
         BuildRange(out this._ranges, null, ImGui.GetIO().Fonts.GetGlyphRangesDefault());
         BuildRange(out this._jpRange, GlyphRangesJapanese.GlyphRanges);
-        this.SetUpUserFonts();
+        //this.SetUpUserFonts();
 
         var gameSym = File.ReadAllBytes(Path.Combine(this.Plugin.Interface.DalamudAssetDirectory.FullName, "UIRes", "gamesym.ttf"));
         this._gameSymFont = (
@@ -122,7 +124,16 @@ internal sealed class PluginUi : IDisposable {
         uiBuilder.DisableCutsceneUiHide = true;
         uiBuilder.DisableGposeUiHide = true;
 
-        uiBuilder.BuildFonts += this.BuildFonts;
+        ImGuiIOPtr io = ImGui.GetIO();
+
+        //ImFontAtlasPtr fonts = io.Fonts;
+        //ImFontConfig config = new ImFontConfig();
+        //config.SizePixels = this.Plugin.Config.FontSize;    // ImGui default font size is 13 pixels
+        //config.OversampleH = config.OversampleV = 1;
+        //_defaultFontCf = &config;
+        //DefaultFont = fonts.AddFontDefault(&config);
+
+        //uiBuilder.BuildFonts += this.BuildFonts;
         uiBuilder.Draw += this.Draw;
 
         uiBuilder.RebuildFonts();
@@ -130,7 +141,7 @@ internal sealed class PluginUi : IDisposable {
 
     public void Dispose() {
         this.Plugin.Interface.UiBuilder.Draw -= this.Draw;
-        this.Plugin.Interface.UiBuilder.BuildFonts -= this.BuildFonts;
+        //this.Plugin.Interface.UiBuilder.BuildFonts -= this.BuildFonts;
 
         foreach (var component in this.Components) {
             component.Dispose();
@@ -158,16 +169,17 @@ internal sealed class PluginUi : IDisposable {
 
         this._fontCfg.Destroy();
         this._fontCfgMerge.Destroy();
+        //this._defaultFontCf.Destroy();
     }
 
     private void Draw() {
         this.Plugin.Interface.UiBuilder.DisableUserUiHide = !this.Plugin.Config.HideWhenUiHidden;
         this.DefaultText = ImGui.GetStyle().Colors[(int) ImGuiCol.Text];
 
-        var font = this.RegularFont.HasValue;
+        var font = this.DefaultFont.HasValue && false;
 
         if (font) {
-            ImGui.PushFont(this.RegularFont!.Value);
+            ImGui.PushFont(this.DefaultFont!.Value);
         }
 
         foreach (var component in this.Components) {
@@ -190,20 +202,26 @@ internal sealed class PluginUi : IDisposable {
         return memory.ToArray();
     }
 
-    private void SetUpUserFonts() {
+    private void SetUpUserFonts()
+    {
         FontData? fontData = null;
-        if (this.Plugin.Config.GlobalFont.StartsWith(Fonts.IncludedIndicator)) {
+        if (this.Plugin.Config.GlobalFont.StartsWith(Fonts.IncludedIndicator))
+        {
             var globalFont = Fonts.GlobalFonts.FirstOrDefault(font => font.Name == this.Plugin.Config.GlobalFont);
-            if (globalFont != null) {
+            if (globalFont != null)
+            {
                 var regular = new FaceData(this.GetResource(globalFont.ResourcePath), 1f);
                 var italic = new FaceData(this.GetResource(globalFont.ResourcePathItalic), 1f);
                 fontData = new FontData(regular, italic);
             }
-        } else {
+        }
+        else
+        {
             fontData = Fonts.GetFont(this.Plugin.Config.GlobalFont, true);
         }
 
-        if (fontData == null) {
+        if (fontData == null)
+        {
             this.Plugin.Config.GlobalFont = Fonts.GlobalFonts[0].Name;
             this.Plugin.SaveConfig();
 
@@ -213,11 +231,13 @@ internal sealed class PluginUi : IDisposable {
             fontData = new FontData(regular, italic);
         }
 
-        if (this._regularFont.Item1.IsAllocated) {
+        if (this._regularFont.Item1.IsAllocated)
+        {
             this._regularFont.Item1.Free();
         }
 
-        if (this._italicFont.Item1.IsAllocated) {
+        if (this._italicFont.Item1.IsAllocated)
+        {
             this._italicFont.Item1.Free();
         }
 
@@ -234,19 +254,24 @@ internal sealed class PluginUi : IDisposable {
         );
 
         FontData? jpFontData = null;
-        if (this.Plugin.Config.JapaneseFont.StartsWith(Fonts.IncludedIndicator)) {
+        if (this.Plugin.Config.JapaneseFont.StartsWith(Fonts.IncludedIndicator))
+        {
             var jpFont = Fonts.JapaneseFonts.FirstOrDefault(item => item.Item1 == this.Plugin.Config.JapaneseFont);
-            if (jpFont != default) {
+            if (jpFont != default)
+            {
                 jpFontData = new FontData(
                     new FaceData(this.GetResource(jpFont.Item2), 1f),
                     null
                 );
             }
-        } else {
+        }
+        else
+        {
             jpFontData = Fonts.GetFont(this.Plugin.Config.JapaneseFont, false);
         }
 
-        if (jpFontData == null) {
+        if (jpFontData == null)
+        {
             this.Plugin.Config.JapaneseFont = Fonts.JapaneseFonts[0].Item1;
             this.Plugin.SaveConfig();
 
@@ -257,7 +282,8 @@ internal sealed class PluginUi : IDisposable {
             );
         }
 
-        if (this._jpFont.Item1.IsAllocated) {
+        if (this._jpFont.Item1.IsAllocated)
+        {
             this._jpFont.Item1.Free();
         }
 

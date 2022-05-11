@@ -22,7 +22,7 @@ internal sealed class Settings : IUiComponent {
 
         this.Tabs = new List<ISettingsTab> {
             new Display(this.Mutable),
-            new Ui.SettingsTabs.Fonts(this.Mutable),
+            //new Ui.SettingsTabs.Fonts(this.Mutable),
             new ChatColours(this.Mutable, this.Ui.Plugin),
             new Tabs(this.Mutable),
             new Database(this.Mutable, this.Ui.Plugin.Store),
@@ -144,8 +144,8 @@ internal sealed class Settings : IUiComponent {
             var config = this.Ui.Plugin.Config;
 
             var hideChatChanged = this.Mutable.HideChat != this.Ui.Plugin.Config.HideChat;
-            var fontChanged = this.Mutable.GlobalFont != this.Ui.Plugin.Config.GlobalFont
-                              || this.Mutable.JapaneseFont != this.Ui.Plugin.Config.JapaneseFont;
+            //var fontChanged = this.Mutable.GlobalFont != this.Ui.Plugin.Config.GlobalFont
+            //                  || this.Mutable.JapaneseFont != this.Ui.Plugin.Config.JapaneseFont;
             var fontSizeChanged = Math.Abs(this.Mutable.FontSize - this.Ui.Plugin.Config.FontSize) > 0.001
                                   || Math.Abs(this.Mutable.JapaneseFontSize - this.Ui.Plugin.Config.JapaneseFontSize) > 0.001
                                   || Math.Abs(this.Mutable.SymbolsFontSize - this.Ui.Plugin.Config.SymbolsFontSize) > 0.001;
@@ -160,9 +160,9 @@ internal sealed class Settings : IUiComponent {
 
             this.Ui.Plugin.Store.FilterAllTabs(false);
 
-            if (fontChanged || fontSizeChanged) {
-                this.Ui.Plugin.Interface.UiBuilder.RebuildFonts();
-            }
+            //if (fontChanged || fontSizeChanged) {
+            //    this.Ui.Plugin.Interface.UiBuilder.RebuildFonts();
+            //}
 
             if (langChanged) {
                 this.Ui.Plugin.LanguageChanged(this.Ui.Plugin.Interface.UiLanguage);

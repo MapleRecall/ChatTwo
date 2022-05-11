@@ -69,8 +69,8 @@ internal class Configuration : IPluginConfiguration {
         this.FontSize = other.FontSize;
         this.JapaneseFontSize = other.JapaneseFontSize;
         this.SymbolsFontSize = other.SymbolsFontSize;
-        this.GlobalFont = other.GlobalFont;
-        this.JapaneseFont = other.JapaneseFont;
+        //this.GlobalFont = other.GlobalFont;
+        //this.JapaneseFont = other.JapaneseFont;
         this.WindowAlpha = other.WindowAlpha;
         this.ChatColours = other.ChatColours.ToDictionary(entry => entry.Key, entry => entry.Value);
         this.Tabs = other.Tabs.Select(t => t.Clone()).ToList();
